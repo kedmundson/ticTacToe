@@ -1,10 +1,7 @@
-// This is a game of Tic Tac Toe for two human players to play
-// in a browser. X begins each game.
-
 (function () {
 
-  var playerX = { gamePiece: 'X', score: [] }
-    , playerO = { gamePiece: 'O', score: [] }
+  var playerX = { gamePiece: 'X', score: 0 }
+    , playerO = { gamePiece: 'O', score: 0 }
     , currentPlayer
     , moves
     , movesLimit = 9
@@ -45,21 +42,12 @@
         document.getElementById('ticTacToeBoard').appendChild(board);
       }
 
-    , winningScores = [
-        [1, 2, 4],
-        [8, 16, 32],
-        [64, 128, 256].
-        [1, 8, 64],
-        [2, 16, 128],
-        [4, 32, 156],
-        [1, 16, 256],
-        [4, 16, 64]
-      ]
+    , winningScores = [ 7, 15, 56, 84, 146, 273, 292, 448 ]
 
     , recordMove = function () {
         if (this.textContent !== '') return;
         this.textContent = currentPlayer.gamePiece;
-        currentPlayer.score = currentPlayer.score.push(this.boxScore);
+        currentPlayer.score += this.boxScore;
         moves += 1;
         if ( checkForWins(currentPlayer) || checkForTie() ) {
           return;
@@ -71,22 +59,23 @@
     , checkForWins = function (player) {
         if (moves >= 5) {
           for (var i = 0; i < winningScores.length; i++) {
-            if (isSubsetOf(winningScores[i], player.score)) {
+            //
+            // Convert player.score and winningScores[i] to bit representations
+            // and binary AND them using the '&' bitwise operator. If the two
+            // operands match, the result will be the same as either operand
+            // and therefore equal to winningScores[i]
+            //
+            // Using bits to represent an X or O in each box of the game board means that
+            // this operation will work even if a player has marked more than three boxes
+            // before getting a win.
+            //
+            if ((player.score & winningScores[i]) === winningScores[i]) {
               alert(player.gamePiece + " won! Do you want to play again?");
               newGame();
               return true;
             }
           }
         }
-      }
-
-    , isSubsetOf = function (smaller, bigger) {
-        for (var i = 0; i < smaller.length; i++) {
-          if (bigger.indexOf(smaller[i]) == -1) {
-             return false;
-          }
-        }
-        return true;
       }
 
     // End game in a tie if no one wins before movesLimit is reached
